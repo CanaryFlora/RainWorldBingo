@@ -73,6 +73,9 @@ namespace BingoMode.BingoChallenges
         public const string ExpObject = "expobject";
         public const string Vista = "vista";
         public const string Storable = "storable";
+        public const string CreaturesToShelters = "creaturestoshelters";
+        public const string SpecificMerchantItems = "specificmerchantitems";
+        public const string MerchantRegions = "merchantregions";
     }
 
     public static class ChallengeUtils
@@ -198,6 +201,9 @@ namespace BingoMode.BingoChallenges
                 case ChallengeListConstants.Passage: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.Passage, null, sorted);
                 case ChallengeListConstants.ExpObject: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.Storable, Storable, sorted);
                 case ChallengeListConstants.Vista: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.Vista, null, sorted);
+                case ChallengeListConstants.CreaturesToShelters: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.CreaturesToShelters, CreaturesToShelters, sorted);
+                case ChallengeListConstants.SpecificMerchantItems: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.SpecificMerchantItems, SpecificMerchantItems, sorted);
+                case ChallengeListConstants.MerchantRegions: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.MerchantRegions, MerchantRegions, sorted);
             }
             return ["Whoops something went wrong"];
         }
@@ -767,6 +773,110 @@ namespace BingoMode.BingoChallenges
             "FireSpriteLarva",
             "GraffitiBomb",
             "Boomerang",
+        };
+
+        public static readonly string[] CreaturesToShelters =
+        {
+            // creature section
+            "GreenLizard",
+            "PinkLizard",
+            "Salamander",
+            "YellowLizard",
+            "BlackLizard",
+            "CyanLizard",
+            "WhiteLizard",
+            "BlueLizard",
+            "RedLizard",
+            "BigSpider",
+            "Hazer",
+            "VultureGrub",
+            "SmallNeedleWorm",
+            "Fly",
+            "SmallCentipede",
+            "CicadaA",
+            "CicadaB",
+            "BigNeedleWorm",
+            "Snail",
+            "Scavenger",
+            "LanternMouse",
+            "JetFish",
+            "TubeWorm",
+            "EggBug",
+            "DropBug",
+
+            // MSC
+            "Yeek",
+            "ScavengerElite",
+            "EelLizard",
+            "SpitLizard",
+            "ZoopLizard",
+
+            // watcher
+            "PeachLizard",
+            "IndigoLizard",
+            "BlizzardLizard",
+            "BasiliskLizard",
+            "Tardigrade",
+            "Barnacle",
+            "SandGrub",
+            "ScavengerTemplar",
+            "ScavengerDisciple",
+            "Frog",
+        };
+
+
+        public static readonly string[] SpecificMerchantItems =
+        {
+            "Any Items",
+            "Rock",
+            "Spear",
+            //"ExplosiveSpear",
+            "DataPearl",
+            //"UniqueDataPearl",
+            "ScavengerBomb",
+            "SporePlant",
+            "Lantern",
+            "VultureMask",
+            "FlyLure",
+            "Mushroom",
+            "FlareBomb",
+            "PuffBall",
+            "FirecrackerPlant",
+            "JellyFish",
+            //"OverseerCarcass",
+            "KarmaFlower",
+
+            // MSC
+            //"ElectricSpear",
+            "LillyPuck",
+            "GooieDuck",
+            "GlowWeed",
+            "SingularityBomb",
+
+            // Watcher
+            "Boomerang",
+            "GraffitiBomb"
+
+        };
+
+        public static readonly string[] MerchantRegions =
+        {
+            "Any Region",
+            "GW",
+            "SH",
+            "SI",
+            "SB",
+            
+            // MSC
+            "MS",
+            "CL",
+            "UG",
+
+            // Watcher
+            "WBLA",
+            "WSKD",
+            "WARC",
+
         };
 
         public static void PopulateWatcherData()

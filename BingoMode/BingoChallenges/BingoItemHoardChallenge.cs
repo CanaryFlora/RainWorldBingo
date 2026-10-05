@@ -154,46 +154,59 @@ namespace BingoMode.BingoChallenges
                     int count = 0;
                     for (int j = 0; j < this.game.Players[i].realizedCreature.room.updateList.Count; j++)
                     {
-                        if (this.game.Players[i].realizedCreature.room.updateList[j] is PhysicalObject p && p.abstractPhysicalObject.type.value == target.Value)
+                        if (this.game.Players[i].realizedCreature.room.updateList[j] is PhysicalObject p)
                         {
-                            if (!ItemInLocation(p.abstractPhysicalObject))
+                            string objectType = "";
+                            if (p is Creature crit)
                             {
-                                return;
+                                objectType = crit.abstractCreature.creatureTemplate.type.value;
                             }
                             else
                             {
-                                if (anyShelter.Value)
+                                objectType = p.abstractPhysicalObject.type.value;
+                                continue;
+                            }
+
+                            if (objectType == target.Value)
+                            {
+                                if (!ItemInLocation(p.abstractPhysicalObject))
                                 {
-                                    string id = p.abstractPhysicalObject.ID.ToString();
-                                    if (!collected.Contains(id))
-                                    {
-                                        collected.Add(id);
-                                        current++;
-                                        UpdateDescription();
-                                        if (current >= amount.Value)
-                                        {
-                                            this.CompleteChallenge();
-                                            return;
-                                        }
-                                        else ChangeValue();
-                                    }
+                                    return;
                                 }
                                 else
                                 {
-                                    count++;
-                                    UpdateDescription();
-                                    if (count >= amount.Value)
+                                    if (anyShelter.Value)
                                     {
-                                        current = count;
-                                        this.CompleteChallenge();
-                                        return;
+                                        string id = p.abstractPhysicalObject.ID.ToString();
+                                        if (!collected.Contains(id))
+                                        {
+                                            collected.Add(id);
+                                            current++;
+                                            UpdateDescription();
+                                            if (current >= amount.Value)
+                                            {
+                                                this.CompleteChallenge();
+                                                return;
+                                            }
+                                            else ChangeValue();
+                                        }
+                                    }
+                                    else
+                                    {
+                                        count++;
+                                        UpdateDescription();
+                                        if (count >= amount.Value)
+                                        {
+                                            current = count;
+                                            this.CompleteChallenge();
+                                            return;
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-
             }
         }
 
