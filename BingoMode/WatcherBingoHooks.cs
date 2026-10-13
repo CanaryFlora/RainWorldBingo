@@ -1580,7 +1580,7 @@ namespace BingoMode
                     return self;
                 });
             }
-            else Plugin.logger.LogError("FastTravelScreen_ctor FAIULRE " + il);
+            else Plugin.logger.LogError("SleepAndDeathScreen_GetDataFromGame FAIULRE " + il);
         }
 
         private static void StatsDialog_ResetAll_OnPressDone(On.Menu.StatsDialog.orig_ResetAll_OnPressDone orig, Menu.StatsDialog self, Menu.Remix.MixedUI.UIfocusable trigger)

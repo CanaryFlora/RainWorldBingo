@@ -82,7 +82,10 @@ namespace BingoMode.BingoChallenges
         public override Phrase ConstructPhrase()
         {
             Phrase phrase = new([[new Icon("FriendB")], [new Counter(current, amount.Value)]]);
-            if (specific.Value) phrase.InsertWord(Icon.FromEntityName(crit.Value), 0);
+            if (specific.Value)
+            {
+                phrase.InsertWord(Icon.FromEntityName(crit.Value), 0);
+            }
             return phrase;
         }
 

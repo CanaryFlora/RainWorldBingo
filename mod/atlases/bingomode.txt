@@ -40,7 +40,7 @@
 	"spriteSourceSize": {"x":0,"y":0,"w":231,"h":103},
 	"sourceSize": {"w":231,"h":103}
 },
-"logo.png":
+"bingologo.png":
 {
 	"frame": {"x":0,"y":155,"w":251,"h":63},
 	"rotated": false,

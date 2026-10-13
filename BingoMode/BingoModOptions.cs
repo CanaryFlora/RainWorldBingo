@@ -75,7 +75,7 @@ namespace BingoMode
             optionse = new UIelement[]
             {
 
-                new OpImage(new Vector2(174f, 545f), "logo"),
+                new OpImage(new Vector2(174f, 545f), "bingologo"),
                 new OpImage(new Vector2(0f, 542f), "pixel") { scale = new Vector2(600f, 2f), color = Menu.MenuColorEffect.rgbMediumGrey },
 
                 new OpLabel(8f, 510f, Translate("Keyboard - ")) {alignment = FLabelAlignment.Left},

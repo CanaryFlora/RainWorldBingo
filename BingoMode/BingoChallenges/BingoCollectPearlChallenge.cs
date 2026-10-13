@@ -73,6 +73,7 @@ namespace BingoMode.BingoChallenges
             region = Regex.Split(pearl.Value, "_")[0];
             if (ExpeditionData.slugcatPlayer == MoreSlugcatsEnums.SlugcatStatsName.Saint && region == "DS") region = "UG";
             if ((ExpeditionData.slugcatPlayer == MoreSlugcatsEnums.SlugcatStatsName.Spear || ExpeditionData.slugcatPlayer == MoreSlugcatsEnums.SlugcatStatsName.Artificer) && region == "MS") region = "GW";
+            if ((ExpeditionData.slugcatPlayer == MoreSlugcatsEnums.SlugcatStatsName.Spear || ExpeditionData.slugcatPlayer == MoreSlugcatsEnums.SlugcatStatsName.Artificer) && region == "SL") region = "LM";
 
             this.description = specific.Value ? ChallengeTools.IGT.Translate("Touch the <pearl> pearl in <region>")
                 .Replace("<region>", ChallengeTools.IGT.Translate(Region.GetRegionFullName(region, BingoData.slugcatPlayer)))

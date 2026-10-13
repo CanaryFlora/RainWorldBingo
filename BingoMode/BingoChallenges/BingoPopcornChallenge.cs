@@ -81,13 +81,14 @@ namespace BingoMode.BingoChallenges
             }
             else if (region.Value != "Any Region")
             {
-                phrase.InsertWord(new Verse(region.Value), 1);
-                phrase.InsertWord(new Counter(current, amount.Value), 2);
+                phrase.InsertWord(new Spacer(4f), 1);
+                phrase.InsertWord(new Verse(region.Value), 2);
+                phrase.InsertWord(new Spacer(-7f), 3);
+                phrase.InsertWord(new Counter(current, amount.Value), 4);
                 if (oneCycle.Value)
                 {
-                    phrase.InsertWord(new Icon("cycle_limit"), 2);
-                }
-            }
+                    phrase.InsertWord(new Icon("cycle_limit"), 4);
+                }            }
             else
             {
                 phrase.InsertWord(new Counter(current, amount.Value), 1, 0);

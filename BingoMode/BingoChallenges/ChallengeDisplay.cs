@@ -34,19 +34,60 @@ namespace BingoMode.BingoChallenges
         public void Draw()
         {
             float scaledSpacing = SPACING * scale;
-            Vector2 cursor = centerPos + new Vector2(0f, (_words.Count - 1) * scaledSpacing * 0.5f); //set cursor on first line
 
-            foreach (List<Word> wordLine in _words)
+            // Calculate the vertical step after each row
+            List<float> rowSteps = new List<float>();
+
+            foreach (List<Word> line in _words)
             {
-                cursor.x = centerPos.x - ((wordLine.Count - 1) * scaledSpacing * 0.5f); //set cursor at beginning of line
+                bool hasWords = line.Any(w => w is not Spacer);
+
+                rowSteps.Add(hasWords ? scaledSpacing : line.OfType<Spacer>().Sum(s => s.size));
+            }
+
+            // Center using the actual distance between row positions
+            float totalHeight = rowSteps.Take(Mathf.Max(0, rowSteps.Count - 1)).Sum();
+            float cursorY = centerPos.y + totalHeight * 0.5f;
+
+            for (int row = 0; row < _words.Count; row++)
+            {
+                List<Word> wordLine = _words[row];
+
+                List<Word> words = new List<Word>();
+                List<float> gaps = new List<float>();
+                float extraSpacing = 0f;
+
                 foreach (Word word in wordLine)
                 {
-                    word.display.SetPosition(cursor);
-                    word.background?.SetPosition(cursor);
-                    if (applyScale) word.display.scale = scale;
-                    cursor.x += scaledSpacing;
+                    if (word is Spacer spacer)
+                    {
+                        extraSpacing += spacer.size;
+                    }
+                    else
+                    {
+                        if (words.Count > 0) gaps.Add(scaledSpacing + extraSpacing);
+
+                        words.Add(word);
+                        extraSpacing = 0f;
+                    }
                 }
-                cursor.y -= scaledSpacing;
+
+                float totalWidth = gaps.Sum();
+                float cursorX = centerPos.x - totalWidth * 0.5f;
+
+                foreach (Word word in words)
+                {
+                    word.display.SetPosition(new Vector2(cursorX, cursorY));
+                    word.background?.SetPosition(new Vector2(cursorX, cursorY));
+
+                    if (applyScale) word.display.scale = scale;
+
+                    int index = words.IndexOf(word);
+                    if (index < gaps.Count) cursorX += gaps[index];
+                }
+
+                // Move to the next row using the actual vertical step
+                if (row < rowSteps.Count - 1) cursorY -= rowSteps[row];
             }
         }
 
@@ -195,6 +236,15 @@ namespace BingoMode.BingoChallenges
 
         public Word()
         {
+        }
+    }
+
+    public class Spacer : Word
+    {
+        public float size;
+        public Spacer(float size) : base()
+        {
+            this.size = size;
         }
     }
 
