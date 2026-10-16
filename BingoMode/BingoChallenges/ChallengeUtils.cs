@@ -56,6 +56,7 @@ namespace BingoMode.BingoChallenges
         public const string Craft = "craft";
         public const string Regions = "regions";
         public const string RegionsReal = "regionsreal";
+        public const string RegionsAnyDiff = "regionsanydiff";
         public const string NootRegions = "nootregions";
         public const string PopcornRegions = "popcornregions";
         public const string PomegranateRegions = "pomegranateregions";
@@ -73,6 +74,11 @@ namespace BingoMode.BingoChallenges
         public const string ExpObject = "expobject";
         public const string Vista = "vista";
         public const string Storable = "storable";
+        public const string CreaturesToShelters = "creaturestoshelters";
+        public const string SpecificMerchantItems = "specificmerchantitems";
+        public const string MerchantRegions = "merchantregions";
+        public const string DodgeableCreatures = "dodgeablecreatures";
+        public const string DodgeRegions = "dodgeregions";
     }
 
     public static class ChallengeUtils
@@ -180,6 +186,7 @@ namespace BingoMode.BingoChallenges
                 case ChallengeListConstants.Craft: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.Craft, CraftableItems, sorted);
                 case ChallengeListConstants.Regions: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.Regions, null, sorted);
                 case ChallengeListConstants.RegionsReal: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.RegionsReal, null, sorted);
+                case ChallengeListConstants.RegionsAnyDiff: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.RegionsAnyDiff, null, sorted);
                 case ChallengeListConstants.NootRegions: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.NootRegions, GetCorrectListForChallenge(ChallengeListConstants.Regions), sorted);
                 case ChallengeListConstants.PopcornRegions: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.PopcornRegions, GetCorrectListForChallenge(ChallengeListConstants.RegionsReal), sorted);
                 case ChallengeListConstants.PomegranateRegions: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.PomegranateRegions, PomegranateRegions, sorted);
@@ -198,6 +205,10 @@ namespace BingoMode.BingoChallenges
                 case ChallengeListConstants.Passage: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.Passage, null, sorted);
                 case ChallengeListConstants.ExpObject: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.Storable, Storable, sorted);
                 case ChallengeListConstants.Vista: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.Vista, null, sorted);
+                case ChallengeListConstants.CreaturesToShelters: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.CreaturesToShelters, CreaturesToShelters, sorted);
+                case ChallengeListConstants.SpecificMerchantItems: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.SpecificMerchantItems, SpecificMerchantItems, sorted);
+                case ChallengeListConstants.MerchantRegions: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.MerchantRegions, MerchantRegions, sorted);
+                case ChallengeListConstants.DodgeableCreatures: return ChallengeUtilsFiltering.GetFilteredList(ChallengeListConstants.DodgeableCreatures, DodgeableCreatures, sorted);
             }
             return ["Whoops something went wrong"];
         }
@@ -768,6 +779,186 @@ namespace BingoMode.BingoChallenges
             "FireSpriteLarva",
             "GraffitiBomb",
             "Boomerang",
+        };
+
+        public static readonly string[] CreaturesToShelters =
+        {
+            // creature section
+            "GreenLizard",
+            "PinkLizard",
+            "Salamander",
+            "YellowLizard",
+            "BlackLizard",
+            "CyanLizard",
+            "WhiteLizard",
+            "BlueLizard",
+            "RedLizard",
+            "BigSpider",
+            "Hazer",
+            "VultureGrub",
+            "SmallNeedleWorm",
+            "Fly",
+            "SmallCentipede",
+            "CicadaA",
+            "CicadaB",
+            "BigNeedleWorm",
+            "Snail",
+            "Scavenger",
+            "LanternMouse",
+            "JetFish",
+            "TubeWorm",
+            "EggBug",
+            "DropBug",
+
+            // MSC
+            "Yeek",
+            "ScavengerElite",
+            "EelLizard",
+            "SpitLizard",
+            "ZoopLizard",
+
+            // watcher
+            "PeachLizard",
+            "IndigoLizard",
+            "BlizzardLizard",
+            "BasiliskLizard",
+            "Tardigrade",
+            "Barnacle",
+            "SandGrub",
+            "ScavengerTemplar",
+            "ScavengerDisciple",
+            "Frog",
+        };
+
+
+        public static readonly string[] SpecificMerchantItems =
+        {
+            "Any Items",
+            //"Rock",
+            "Spear",
+            //"ExplosiveSpear",
+            "DataPearl",
+            //"UniqueDataPearl",
+            "ScavengerBomb",
+            "SporePlant",
+            "Lantern",
+            "VultureMask",
+            "FlyLure",
+            "Mushroom",
+            "FlareBomb",
+            "PuffBall",
+            "FirecrackerPlant",
+            "JellyFish",
+            //"OverseerCarcass",
+            "KarmaFlower",
+
+            // MSC
+            //"ElectricSpear",
+            "LillyPuck",
+            "GooieDuck",
+            "GlowWeed",
+            "SingularityBomb",
+
+            // Watcher
+            "Boomerang",
+            "GraffitiBomb"
+
+        };
+
+        public static readonly string[] MerchantRegions =
+        {
+            "Any Region",
+            "GW",
+            "SH",
+            "SI",
+            "SB",
+            
+            // MSC
+            "MS",
+            "CL",
+            "UG",
+
+            // Watcher
+            "WBLA",
+            "WSKD",
+            "WARC",
+
+        };
+
+        public static readonly string[] DodgeableCreatures =
+        {
+            "BigNeedleWorm",
+            "KingVulture",
+            "SpitterSpider",
+            "BigEel",
+        };
+
+        public static readonly string[] DodgeRegions =
+        {
+            "Any Region",
+            // leviathan
+            "SL",
+            "SB",
+            // washer
+            "WRFA",
+            "WRFB",
+            // non arti spear
+            "MS",
+            
+            // noot
+            // monk
+            "SI",
+            "LF",
+            "OE",
+            // surv
+            "SB",
+            "SU",
+            // hunter arti spear
+            "CC",
+            // washer
+            "WSKB",
+            "WRRA",
+            "WPGA",
+            "WARG",
+            "WARE",
+            "WMPA",
+            "WARC",
+            
+            // king vulture
+            "SU",
+            "HI",
+            "GW",
+            "UW",
+            "CC",
+            "SI",
+            "LF",
+            "VS",
+            // hunter gourm
+            "SL",
+            // arti spear
+            "LM",
+            "LC",
+            // washer
+            "WPTA",
+            "WHIR",
+            "WGWR",
+
+            // spitter
+            "SH",
+            "UW",
+            "CC",
+            "LF",
+            "SB",
+            "GW",
+            "DS",
+            "DM",
+            "UG",
+            "VS",
+            // washer
+            "WARC",
+            "WVWB",
+            "WARA",
+
         };
 
         public static void PopulateWatcherData()

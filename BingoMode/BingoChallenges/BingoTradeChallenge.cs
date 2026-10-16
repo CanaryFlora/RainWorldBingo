@@ -17,6 +17,10 @@ namespace BingoMode.BingoChallenges
     public class BingoTradeRandomizer : ChallengeRandomizer
     {
         public Randomizer<int> amount;
+        public Randomizer<string> item;
+        public Randomizer<int> itemAmount;
+        public Randomizer<string> region;
+
 
         public override Challenge Random()
         {
@@ -43,28 +47,70 @@ namespace BingoMode.BingoChallenges
     public class BingoTradeChallenge : BingoChallenge
     {
         public SettingBox<int> amount;
+        public SettingBox<string> item;
+        public SettingBox<int> itemAmount;
+        public SettingBox<string> region;
         public int current;
-        public List<EntityID> bannedIDs;
+        public List<EntityID> tradedItemIDs;
+        public Dictionary<EntityID, string> bannedMerchantForItem;
 
         public BingoTradeChallenge()
         {
             amount = new(0, "Value", 0);
-            bannedIDs = [];
+            region = new("", "Any Region", 1);
+            item = new("", "Item", 3, listName: ChallengeListConstants.SpecificMerchantItems);;
+            itemAmount = new(0, "Item Amount", 4);
+            tradedItemIDs = [];
+            bannedMerchantForItem = [];
         }
 
         public override void UpdateDescription()
         {
-            this.description = ChallengeTools.IGT.Translate("Trade [<current>/<amount>] worth of value to Scavenger Merchants")
-                .Replace("<amount>", ValueConverter.ConvertToString(amount.Value))
-                .Replace("<current>", ValueConverter.ConvertToString(current));
+            string regionMod = region.Value != "Any Region" ? ChallengeTools.IGT.Translate(Region.GetRegionFullName(region.Value, BingoData.slugcatPlayer)) : "";
+            if (item.Value == "Any Items")
+            {
+                this.description = ChallengeTools.IGT.Translate("Trade [<current>/<amount>] worth of value to Scavenger Merchants <region>")
+                    .Replace("<amount>", ValueConverter.ConvertToString(amount.Value))
+                    .Replace("<current>", ValueConverter.ConvertToString(current))
+                    .Replace("<region>", regionMod != "" ? ChallengeTools.IGT.Translate("in ") + regionMod : "");
+            }
+            else if (item.Value != "Any Items")
+            {
+                this.description = ChallengeTools.IGT.Translate("Trade [<current>/<amount>] <item> to Scavenger Merchants <region>")
+                    .Replace("<amount>", ValueConverter.ConvertToString(itemAmount.Value))
+                    .Replace("<current>", ValueConverter.ConvertToString(current))
+                    .Replace("<item>", ChallengeTools.IGT.Translate(ChallengeTools.ItemName(new(item.Value))))
+                    .Replace("<region>", regionMod != "" ? ChallengeTools.IGT.Translate("in ") + regionMod : "");
+            }
             base.UpdateDescription();
         }
 
         public override Phrase ConstructPhrase()
         {
-            return new Phrase(
-                [[new Icon("scav_merchant")],
-                [new Counter(current, amount.Value)]]);
+            Phrase phrase;
+            int shownNumber = item.Value == "Any Items" ? amount.Value : itemAmount.Value;
+            if (item.Value != "Any Items") {
+                phrase = new Phrase([[
+                    item.Value == "KarmaFlower" ? Icon.KARMA_FLOWER : Icon.FromEntityName(item.Value),
+                    new Icon(Plugin.PluginInstance.BingoConfig.FillIcons.Value ? "keyShiftB" : "keyShiftA", 1f, Color.white, 90), new Icon("scav_merchant")]]);
+            } else
+            {
+                phrase = new Phrase(
+                [[new Icon("scav_merchant")]]
+                );
+            };
+            int lastLine = 1;
+            if (region.Value != "Any Region")
+            {
+                phrase.InsertWord(new Verse(region.Value), 1);
+                lastLine = 2;
+            }
+            phrase.InsertWord(new Counter(current, shownNumber), lastLine);
+            return phrase;
+
+            //return new Phrase(
+            //    [[new Icon("scav_merchant")],
+            //    [new Counter(current, amount.Value)]]);
         }
 
         public override bool Duplicable(Challenge challenge)
@@ -77,28 +123,35 @@ namespace BingoMode.BingoChallenges
             return ChallengeTools.IGT.Translate("Trading items to merchants");
         }
 
-        public override Challenge Generate()
-        {
-            int amou = UnityEngine.Random.Range(5, 21);
-
-            return new BingoTradeChallenge
+            public override Challenge Generate()
             {
-                amount = new(amou, "Value", 0),
-                bannedIDs = []
-            };
-        }
+                int amou = UnityEngine.Random.Range(5, 21);
+                int specAmou = UnityEngine.Random.Range(1, 3);
+                bool isSpecific = UnityEngine.Random.value < 0.5f;
+                bool anyRegion = UnityEngine.Random.value < 0.5f;
+
+                return new BingoTradeChallenge
+                {
+                    amount = new(amou, "Value", 0),
+                    region = new(!anyRegion ? "Any Region" : ChallengeUtils.GetCorrectListForChallenge(ChallengeListConstants.MerchantRegions)[UnityEngine.Random.Range(0, ChallengeUtils.GetCorrectListForChallenge(ChallengeListConstants.MerchantRegions).Length)], "Region", 1, listName: ChallengeListConstants.MerchantRegions),
+                    item = new(!isSpecific ? "Any Items" : ChallengeUtils.GetCorrectListForChallenge(ChallengeListConstants.SpecificMerchantItems)[UnityEngine.Random.Range(0, ChallengeUtils.GetCorrectListForChallenge(ChallengeListConstants.SpecificMerchantItems).Length)], "Item", 2, listName: ChallengeListConstants.SpecificMerchantItems),
+                    itemAmount = new(specAmou, "Amount", 3),
+                    tradedItemIDs = [],
+                    bannedMerchantForItem = new Dictionary<EntityID, string>(),
+                };
+            }
 
         public void Traded(int pnts, EntityID ID)
         {
             if (completed || TeamsCompleted[SteamTest.team] || revealed || hidden) return;
             
-            if (!bannedIDs.Contains(ID))
+            if (!tradedItemIDs.Contains(ID))
             {
                 current += pnts;
-                bannedIDs.Add(ID);
+                tradedItemIDs.Add(ID);
                 UpdateDescription();
 
-                if (current >= amount.Value)
+                if ((item.Value == "Any Items" && current >= amount.Value) || item.Value != "Any Items" && current >= itemAmount.Value)
                 {
                     CompleteChallenge();
                 }
@@ -137,6 +190,11 @@ namespace BingoMode.BingoChallenges
                 "><",
                 amount.ToString(),
                 "><",
+                region.ToString(),       
+                "><",
+                item.ToString(),         
+                "><",
+                itemAmount.ToString(),   
                 completed ? "1" : "0",
                 "><",
                 revealed ? "1" : "0"
@@ -149,10 +207,18 @@ namespace BingoMode.BingoChallenges
             {
                 string[] array = Regex.Split(args, "><");
                 current = int.Parse(array[0], NumberStyles.Any, CultureInfo.InvariantCulture);
+
                 amount = SettingBoxFromString(array[1]) as SettingBox<int>;
-                completed = (array[2] == "1");
-                revealed = (array[3] == "1");
-                bannedIDs = [];
+                region = SettingBoxFromString(array[2]) as SettingBox<string>;
+                item = SettingBoxFromString(array[3]) as SettingBox<string>;
+                itemAmount = SettingBoxFromString(array[4]) as SettingBox<int>;
+
+                completed = (array[5] == "1");
+                revealed = (array[6] == "1");
+
+                tradedItemIDs = [];
+                bannedMerchantForItem = [];
+
                 UpdateDescription();
             }
             catch (Exception ex)
@@ -168,6 +234,7 @@ namespace BingoMode.BingoChallenges
             On.Room.Unloaded += Room_Unloaded;
             On.Player.ReleaseGrasp += Player_ReleaseGrasp;
             On.Scavenger.Grab += Scavenger_GrabTrade;
+            IL.ScavengerAI.RecognizeCreatureAcceptingGift += ScavengerAI_RecognizeCreatureAcceptingGift2;
         }
 
         public override void RemoveHooks()
@@ -176,8 +243,9 @@ namespace BingoMode.BingoChallenges
             On.Room.Unloaded -= Room_Unloaded;
             On.Player.ReleaseGrasp -= Player_ReleaseGrasp;
             On.Scavenger.Grab -= Scavenger_GrabTrade;
+            IL.ScavengerAI.RecognizeCreatureAcceptingGift -= ScavengerAI_RecognizeCreatureAcceptingGift2;
         }
 
-        public override List<object> Settings() => [amount];
+        public override List<object> Settings() => [amount, item, itemAmount, region];
     }
 }

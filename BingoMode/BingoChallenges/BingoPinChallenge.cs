@@ -68,11 +68,18 @@ namespace BingoMode.BingoChallenges
 
         public override void UpdateDescription()
         {
+            string regionReplace;
+            if (region.Value == "Different Regions") {
+                regionReplace = ChallengeTools.IGT.Translate(" in different regions");
+            } else if (region.Value != "Any Region")
+            {
+                regionReplace = ChallengeTools.IGT.Translate(" in ") + ChallengeTools.IGT.Translate(Region.GetRegionFullName(region.Value, BingoData.slugcatPlayer));
+            } else { regionReplace = "";};
             description = ChallengeTools.IGT.Translate("Pin [<current_pin>/<pin_amount>] <crit> to walls or floors<region>")
                 .Replace("<current_pin>", current.ToString())
                 .Replace("<pin_amount>", amount.Value.ToString())
                 .Replace("<crit>", crit.Value != "Any Creature" ? ChallengeTools.creatureNames[new CreatureType(crit.Value).Index] : ChallengeTools.IGT.Translate("creatures"))
-                .Replace("<region>", region.Value != "" ? region.Value == "Any Region" ? ChallengeTools.IGT.Translate(" in different regions") : ChallengeTools.IGT.Translate(" in ") + ChallengeTools.IGT.Translate(Region.GetRegionFullName(region.Value, BingoData.slugcatPlayer)) : "");
+                .Replace("<region>", regionReplace);
             base.UpdateDescription();
         }
 
@@ -81,10 +88,10 @@ namespace BingoMode.BingoChallenges
             Phrase phrase = new(
                 [[new Icon("pin_creature")]]);
             if (crit.Value != "Any Creature") phrase.InsertWord(Icon.FromEntityName(crit.Value));
-            if (region.Value == "Any Region") phrase.InsertWord(new Icon("TravellerA"), 1);
-            else phrase.InsertWord(new Verse(region.Value), 1);
+            if (region.Value == "Different Regions") phrase.InsertWord(new Icon("TravellerA"), 1);
+            else if (region.Value != "Any Region") phrase.InsertWord(new Verse(region.Value), 1);
 
-            phrase.InsertWord(new Counter(current, amount.Value), 2);
+            phrase.InsertWord(new Counter(current, amount.Value), region.Value != "Any Region" ? 2 : 1);
             return phrase;
         }
 
@@ -115,15 +122,18 @@ namespace BingoMode.BingoChallenges
                 regions = BingoData.pinnableCreatureRegions[c].Where(x => x.StartsWith(BingoData.slugcatPlayer.value)).ToList();
             }
             float radom = Random.value; // Radom mentioned
-            if (radom < 0.7f && regions.Count > 0) r = regions[Random.Range(0, regions.Count)];
-            else r = "Any Region";
+            float diffAnyRandom = Random.value;
+            if (radom < 0.5f && regions.Count > 0) r = regions[Random.Range(0, regions.Count)];
+            else {
+                r = diffAnyRandom > 0.5f ? "Different Regions" : "Any Region";
+            };
             if (r.IndexOf('_') != -1) r = r.Split('_')[1];
     
             return new BingoPinChallenge
             {
-                amount = new(Mathf.Max(1, Mathf.FloorToInt(Random.Range(1, 4) / (r == "Any Region" ? 2f : 1f))), "Amount", 0),
+                amount = new(Mathf.Max(1, Mathf.FloorToInt(Random.Range(1, 4) / (r == "Different Regions" ? 2f : 1f))), "Amount", 0),
                 crit = new(c, "Creature Type", 1, listName: ChallengeListConstants.Creatures),
-                region = new(r, "Region", 2, listName: ChallengeListConstants.Regions),
+                region = new(r, "Region", 2, listName: ChallengeListConstants.RegionsAnyDiff),
             };
         }
 
@@ -153,11 +163,11 @@ namespace BingoMode.BingoChallenges
                     break;
                 }
                 string rr = spearList[k].room.world.region.name;
-                if ((region.Value == "Any Region" || rr == region.Value) && !pinRegions.Contains(rr) && this.spearList[k].stuckInObject != null && this.spearList[k].stuckInObject is Creature c && (crit.Value == "Any Creature" || c.Template.type.value == crit.Value) && this.spearList[k].stuckInWall != null && !this.pinList.Contains(c))
+                if ((region.Value == "Different Regions" || rr == region.Value || region.Value == "Any Region") && !pinRegions.Contains(rr) && this.spearList[k].stuckInObject != null && this.spearList[k].stuckInObject is Creature c && (crit.Value == "Any Creature" || c.Template.type.value == crit.Value) && this.spearList[k].stuckInWall != null && !this.pinList.Contains(c))
                 {
                     this.pinList.Add(c);
                     this.current++;
-                    if (region.Value == "Any Region") pinRegions.Add(rr);
+                    if (region.Value == "Different Regions") pinRegions.Add(rr);
                     this.UpdateDescription();
                     if (current != amount.Value) ChangeValue();
                     this.spearList.Remove(this.spearList[k]);
