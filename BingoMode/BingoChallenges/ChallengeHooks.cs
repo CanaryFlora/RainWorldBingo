@@ -195,7 +195,22 @@ namespace BingoMode.BingoChallenges
                     {
                         if (ExpeditionData.challengeList[j] is BingoTradeChallenge c)
                         {
-                            c.Traded(self.AI.CollectScore(obj, false), obj.abstractPhysicalObject.ID);
+                            bool itemMatch = c.item.Value == "Any Items" || c.item.Value == obj.abstractPhysicalObject.type.value;
+                            bool regionMatch = c.region.Value == "Any Region" || self.room.world.region.name == c.region.Value;
+                            bool isBannedFromThisMerchant = (
+                                c.bannedMerchantForItem.TryGetValue(obj.abstractPhysicalObject.ID, out string sourceRoom) 
+                                && sourceRoom == self.room.abstractRoom.name);
+
+                            if (itemMatch && regionMatch && !isBannedFromThisMerchant)
+                            {
+                                if (c.item.Value == "Any Items")
+                                {   
+                                    c.Traded(self.AI.CollectScore(obj, false), obj.abstractPhysicalObject.ID);
+                                } else
+                                {
+                                    c.Traded(1, obj.abstractPhysicalObject.ID);
+                                }
+                            } 
                         }
                     }
                 }
@@ -649,7 +664,8 @@ namespace BingoMode.BingoChallenges
                     if (ExpeditionData.challengeList.Any(x => x is BingoKarmaFlowerChallenge ||
                         (x is BingoItemHoardChallenge c && c.target.Value == "KarmaFlower") ||
                         (x is BingoCraftChallenge c2 && c2.craftee.Value == "KarmaFlower") ||
-                        (x is BingoStealChallenge c3 && c3.subject.Value == "KarmaFlower"))) {
+                        (x is BingoStealChallenge c3 && c3.subject.Value == "KarmaFlower") ||
+                        (x is BingoTradeChallenge c5 && c5.item.Value == "KarmaFlower"))) {
                         return false;
                     }
                     return orig;
@@ -1339,10 +1355,13 @@ namespace BingoMode.BingoChallenges
                                 EntityID receivedItem = item.abstractPhysicalObject.ID;
                                 string room = self.creature.Room.name;
 
-
-
                                 if (givenItem != receivedItem && !t.traderItems.ContainsKey(givenItem)) t.traderItems.Add(givenItem, room);
                                 //t.Traded(receivedItem, room);
+                            } else if (ExpeditionData.challengeList[j] is BingoTradeChallenge tradeChal)
+                            {
+                                EntityID playerReceivedItem = self.scavenger.room.socialEventRecognizer.ownedItemsOnGround[i].item.abstractPhysicalObject.ID;
+                                string room = self.creature.Room.name;
+                                tradeChal.bannedMerchantForItem[playerReceivedItem] = room;
                             }
                         }
                     }

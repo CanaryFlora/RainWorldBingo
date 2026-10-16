@@ -323,7 +323,21 @@ namespace BingoMode.BingoChallenges
                     string[] watcherForbid = { "SU", "CC", "HI", "SH", "WDSR", "WGWR", "WHIR", "WSUR" };
                     string[] watcherModeForbid = { "WRSA" };
                     SlugName tempSlug = (mode == BingoModifier.WatcherMode) ? watchername : slug;
-                    List<string> mutableBase = new List<string>{ "Any Region" }.Concat(SlugcatStats.SlugcatStoryRegions(tempSlug).Where(x => x.ToLowerInvariant() != "hr"))
+                    List<string> mutableBase = new List<string>{ "Any Region"}.Concat(SlugcatStats.SlugcatStoryRegions(tempSlug).Where(x => x.ToLowerInvariant() != "hr"))
+                    .Concat(SlugcatStats.SlugcatOptionalRegions(tempSlug)).ToList();
+                    if (tempSlug == watchername) mutableBase = mutableBase.Where(x => !watcherForbid.Contains(x)).ToList();
+                    if (tempSlug != slug) mutableBase = mutableBase.Where(x => !watcherModeForbid.Contains(x)).ToList();
+                    return mutableBase.ToArray();
+                }
+            },
+                        {
+                ChallengeListConstants.RegionsAnyDiff,
+                (slug, mode, baselist) =>
+                {
+                    string[] watcherForbid = { "SU", "CC", "HI", "SH", "WDSR", "WGWR", "WHIR", "WSUR" };
+                    string[] watcherModeForbid = { "WRSA" };
+                    SlugName tempSlug = (mode == BingoModifier.WatcherMode) ? watchername : slug;
+                    List<string> mutableBase = new List<string>{ "Any Region",  "Different Regions"}.Concat(SlugcatStats.SlugcatStoryRegions(tempSlug).Where(x => x.ToLowerInvariant() != "hr"))
                     .Concat(SlugcatStats.SlugcatOptionalRegions(tempSlug)).ToList();
                     if (tempSlug == watchername) mutableBase = mutableBase.Where(x => !watcherForbid.Contains(x)).ToList();
                     if (tempSlug != slug) mutableBase = mutableBase.Where(x => !watcherModeForbid.Contains(x)).ToList();
@@ -645,6 +659,32 @@ namespace BingoMode.BingoChallenges
                         && (slug == rivname || !rivOnly.Contains(x))
 
                         && (slug == saintname || !saintOnly.Contains(x))
+
+                        ).ToArray();
+                }
+            },
+            {
+                ChallengeListConstants.DodgeableCreatures,
+                (slug, mode, baseList) =>
+                {
+                    string[] noSaint = {
+                        "BigNeedleWorm"
+                    };
+                    string[] noSurvMonkRivSaint =
+                    {
+                        "King Vulture"
+                    };
+                    string[] noSurvMonk =
+                    {
+                        "Spitter Spider"
+                    };
+                    SlugName tempSlug = (mode == BingoModifier.WatcherMode) ? watchername : slug;
+                    return baseList
+                        .Where(x =>
+
+                        (slug != saintname || !noSaint.Contains(x))
+                        && ((slug != rivname && slug != survivorname && slug != monkname && slug != saintname)|| !noSurvMonkRivSaint.Contains(x))
+                        && ((slug != survivorname && slug != monkname) || !noSurvMonk.Contains(x))
 
                         ).ToArray();
                 }

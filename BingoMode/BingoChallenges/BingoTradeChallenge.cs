@@ -52,7 +52,7 @@ namespace BingoMode.BingoChallenges
         public SettingBox<string> region;
         public int current;
         public List<EntityID> tradedItemIDs;
-        public Dictionary<EntityID, EntityID> bannedMerchantForItem;
+        public Dictionary<EntityID, string> bannedMerchantForItem;
 
         public BingoTradeChallenge()
         {
@@ -61,6 +61,7 @@ namespace BingoMode.BingoChallenges
             item = new("", "Item", 3, listName: ChallengeListConstants.SpecificMerchantItems);;
             itemAmount = new(0, "Item Amount", 4);
             tradedItemIDs = [];
+            bannedMerchantForItem = [];
         }
 
         public override void UpdateDescription()
@@ -122,22 +123,23 @@ namespace BingoMode.BingoChallenges
             return ChallengeTools.IGT.Translate("Trading items to merchants");
         }
 
-        public override Challenge Generate()
-        {
-            int amou = UnityEngine.Random.Range(5, 21);
-            int specAmou = UnityEngine.Random.Range(1, 3);
-            bool isSpecific = UnityEngine.Random.value < 0.5f;
-            bool anyRegion = UnityEngine.Random.value < 0.5f;
-
-            return new BingoTradeChallenge
+            public override Challenge Generate()
             {
-                amount = new(amou, "Value", 0),
-                region = new(!anyRegion ? "Any Region" : ChallengeUtils.GetCorrectListForChallenge(ChallengeListConstants.MerchantRegions)[UnityEngine.Random.Range(0, ChallengeUtils.GetCorrectListForChallenge(ChallengeListConstants.MerchantRegions).Length)], "Region", 1, listName: ChallengeListConstants.MerchantRegions),
-                item = new(!isSpecific ? "Any Items" : ChallengeUtils.GetCorrectListForChallenge(ChallengeListConstants.SpecificMerchantItems)[UnityEngine.Random.Range(0, ChallengeUtils.GetCorrectListForChallenge(ChallengeListConstants.SpecificMerchantItems).Length)], "Item", 2, listName: ChallengeListConstants.SpecificMerchantItems),
-                itemAmount = new(specAmou, "Amount", 3),
-                tradedItemIDs = [],
-            };
-        }
+                int amou = UnityEngine.Random.Range(5, 21);
+                int specAmou = UnityEngine.Random.Range(1, 3);
+                bool isSpecific = UnityEngine.Random.value < 0.5f;
+                bool anyRegion = UnityEngine.Random.value < 0.5f;
+
+                return new BingoTradeChallenge
+                {
+                    amount = new(amou, "Value", 0),
+                    region = new(!anyRegion ? "Any Region" : ChallengeUtils.GetCorrectListForChallenge(ChallengeListConstants.MerchantRegions)[UnityEngine.Random.Range(0, ChallengeUtils.GetCorrectListForChallenge(ChallengeListConstants.MerchantRegions).Length)], "Region", 1, listName: ChallengeListConstants.MerchantRegions),
+                    item = new(!isSpecific ? "Any Items" : ChallengeUtils.GetCorrectListForChallenge(ChallengeListConstants.SpecificMerchantItems)[UnityEngine.Random.Range(0, ChallengeUtils.GetCorrectListForChallenge(ChallengeListConstants.SpecificMerchantItems).Length)], "Item", 2, listName: ChallengeListConstants.SpecificMerchantItems),
+                    itemAmount = new(specAmou, "Amount", 3),
+                    tradedItemIDs = [],
+                    bannedMerchantForItem = new Dictionary<EntityID, string>(),
+                };
+            }
 
         public void Traded(int pnts, EntityID ID)
         {
@@ -149,7 +151,7 @@ namespace BingoMode.BingoChallenges
                 tradedItemIDs.Add(ID);
                 UpdateDescription();
 
-                if (current >= amount.Value)
+                if ((item.Value == "Any Items" && current >= amount.Value) || item.Value != "Any Items" && current >= itemAmount.Value)
                 {
                     CompleteChallenge();
                 }
@@ -188,6 +190,11 @@ namespace BingoMode.BingoChallenges
                 "><",
                 amount.ToString(),
                 "><",
+                region.ToString(),       
+                "><",
+                item.ToString(),         
+                "><",
+                itemAmount.ToString(),   
                 completed ? "1" : "0",
                 "><",
                 revealed ? "1" : "0"
@@ -200,10 +207,18 @@ namespace BingoMode.BingoChallenges
             {
                 string[] array = Regex.Split(args, "><");
                 current = int.Parse(array[0], NumberStyles.Any, CultureInfo.InvariantCulture);
+
                 amount = SettingBoxFromString(array[1]) as SettingBox<int>;
-                completed = (array[2] == "1");
-                revealed = (array[3] == "1");
+                region = SettingBoxFromString(array[2]) as SettingBox<string>;
+                item = SettingBoxFromString(array[3]) as SettingBox<string>;
+                itemAmount = SettingBoxFromString(array[4]) as SettingBox<int>;
+
+                completed = (array[5] == "1");
+                revealed = (array[6] == "1");
+
                 tradedItemIDs = [];
+                bannedMerchantForItem = [];
+
                 UpdateDescription();
             }
             catch (Exception ex)
@@ -219,6 +234,7 @@ namespace BingoMode.BingoChallenges
             On.Room.Unloaded += Room_Unloaded;
             On.Player.ReleaseGrasp += Player_ReleaseGrasp;
             On.Scavenger.Grab += Scavenger_GrabTrade;
+            IL.ScavengerAI.RecognizeCreatureAcceptingGift += ScavengerAI_RecognizeCreatureAcceptingGift2;
         }
 
         public override void RemoveHooks()
@@ -227,6 +243,7 @@ namespace BingoMode.BingoChallenges
             On.Room.Unloaded -= Room_Unloaded;
             On.Player.ReleaseGrasp -= Player_ReleaseGrasp;
             On.Scavenger.Grab -= Scavenger_GrabTrade;
+            IL.ScavengerAI.RecognizeCreatureAcceptingGift -= ScavengerAI_RecognizeCreatureAcceptingGift2;
         }
 
         public override List<object> Settings() => [amount, item, itemAmount, region];

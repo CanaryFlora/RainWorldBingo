@@ -65,6 +65,7 @@ namespace BingoMode.BingoChallenges
 
         public override Phrase ConstructPhrase()
         {
+
             return new(
                 [
                 [Icon.FromEntityName("BigNeedleWorm"), new Icon("slugtarget")],
